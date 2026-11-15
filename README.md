@@ -7,7 +7,7 @@ LogFlow AI is an independent software engineering portfolio project focused on a
 
 The project simulates a logistics operation involving multiple units, shipment reports, pending deliveries and operational discrepancies.
 
-> **Project status:** Initial development — architecture and project structure established.
+> **Project status:** Active development — shipment modeling, business rules, synthetic data generation and Pandas reconciliation implemented.
 
 ## 🎯 Project Goals
 
@@ -54,17 +54,73 @@ The application is planned around the following components:
 ```text
 logflow-ai/
 ├── backend/
-├── docs/
+│   ├── app/
+│   │   ├── domain/
+│   │   │   └── shipment.py
+│   │   └── services/
+│   │       ├── shipment_service.py
+│   │       └── reconciliation_service.py
+│   ├── scripts/
+│   │   ├── generate_demo_data.py
+│   │   └── run_reconciliation.py
+│   └── tests/
+│       └── unit/
+│           ├── test_shipment.py
+│           ├── test_shipment_service.py
+│           └── test_reconciliation_service.py
 ├── data/
 │   └── samples/
+├── docs/
 ├── reports/
-├── main.py
 ├── pyproject.toml
 ├── uv.lock
 └── README.md
 ```
 
 The structure will evolve as new components are implemented.
+
+
+```markdown
+## ✅ Implemented Features
+
+### Shipment Domain
+
+- Shipment data model using Python dataclasses.
+- Shipment validation.
+- Pending and dispatched status identification.
+- Timezone-aware datetime validation.
+
+### Business Rules
+
+- Identification of pending shipments.
+- Identification of delayed shipments.
+- Configurable delay threshold.
+
+### Synthetic Data Generation
+
+- Generation of fictional logistics data.
+- Simulation of multiple operational units.
+- CSV and Excel report generation.
+- Intentional simulation of duplicate and invalid records.
+
+### Pandas Reconciliation
+
+- Report column validation.
+- Data normalization.
+- Duplicate record identification.
+- Invalid record identification.
+- Comparison of received and dispatched reports.
+- Detection of pending shipments.
+- Detection of delayed shipments.
+- Detection of dispatches without matching receipts.
+- Detection of operational unit mismatches.
+
+### Automated Tests
+
+- Unit tests with Pytest.
+- Validation of shipment business rules.
+- Reconciliation scenario tests.
+- Data quality validation tests.
 
 ## 🚀 Getting Started
 
@@ -87,16 +143,43 @@ cd logflow-ai
 uv sync
 ```
 
+### Generate synthetic logistics reports
+
+```bash
+uv run python -m backend.scripts.generate_demo_data
+```
+
+### Run the reconciliation process
+
+```bash
+uv run python -m backend.scripts.run_reconciliation
+```
+
+### Run automated tests
+
+```bash
+uv run pytest -v
+```
+
 The application is still under development. Instructions for running the complete system will be added as the components become available.
+
+The generated reports are stored in data/samples/.
+
+All generated information is synthetic and intended for demonstration and testing purposes.
+
 
 ## 🗺️ Roadmap
 
 - [x] Initialize project structure
 - [x] Configure Python environment with uv
-- [ ] Generate synthetic logistics data
-- [ ] Build shipment processing logic
-- [ ] Implement Excel and CSV ingestion
-- [ ] Implement data reconciliation
+- [x] Implement shipment domain model
+- [x] Implement shipment business rules
+- [x] Generate synthetic logistics data
+- [x] Generate CSV and Excel reports
+- [x] Implement Pandas report reconciliation
+- [x] Identify duplicate and invalid records
+- [x] Implement initial automated tests
+- [ ] Implement complete Excel and CSV ingestion
 - [ ] Integrate SQLite and SQLAlchemy
 - [ ] Develop REST API with FastAPI
 - [ ] Build React dashboard
@@ -104,7 +187,7 @@ The application is still under development. Instructions for running the complet
 - [ ] Implement browser automation with Playwright
 - [ ] Integrate OpenClaw orchestration
 - [ ] Add AI-assisted summaries
-- [ ] Implement automated tests
+- [ ] Implement integration and end-to-end tests
 - [ ] Publish a demonstrable version
 
 ## 🧪 Demo and Data
