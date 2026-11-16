@@ -406,7 +406,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=3.1.1" },
     { name = "pydantic-settings", specifier = ">=2.16.3" },
     { name = "sqlalchemy", specifier = ">=2.1.8" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0" },
+    { name = "uvicorn", extras = ["standard", "standart"], specifier = ">=0.54.0" },
 ]
 
 [package.metadata.requires-dev]
