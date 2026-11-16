@@ -43,7 +43,12 @@ def prepare_report(
         normalized["tracking_code"].astype("string").str.strip().str.upper()
     )
 
-    normalized["unit"] = normalized["unit"].astype("string").str.split()
+    normalized["unit"] = (
+        normalized["unit"]
+        .astype("string")
+        .str.replace(r"\s+", " ", regex=True)
+        .str.strip()
+    )
 
     normalized[date_column] = pd.to_datetime(
         normalized[date_column],

@@ -52,29 +52,31 @@ The application is planned around the following components:
 ## 📂 Project Structure
 
 ```text
-logflow-ai/
-├── backend/
-│   ├── app/
-│   │   ├── domain/
-│   │   │   └── shipment.py
-│   │   └── services/
-│   │       ├── shipment_service.py
-│   │       └── reconciliation_service.py
-│   ├── scripts/
-│   │   ├── generate_demo_data.py
-│   │   └── run_reconciliation.py
-│   └── tests/
-│       └── unit/
-│           ├── test_shipment.py
-│           ├── test_shipment_service.py
-│           └── test_reconciliation_service.py
-├── data/
-│   └── samples/
-├── docs/
-├── reports/
-├── pyproject.toml
-├── uv.lock
-└── README.md
+backend/
+├── app/
+│   ├── domain/
+│   │   └── shipment.py
+│   ├── db/
+│   │   ├── base.py
+│   │   ├── session.py
+│   │   ├── types.py
+│   │   └── models/
+│   │       ├── operation_unit.py
+│   │       ├── shipment.py
+│   │       └── report_import.py
+│   ├── repositories/
+│   │   └── shipment_repository.py
+│   └── services/
+│       ├── shipment_service.py
+│       ├── reconciliation_service.py
+│       └── persistence_service.py
+├── scripts/
+│   ├── generate_demo_data.py
+│   ├── run_reconciliation.py
+│   └── inspect_database.py
+└── tests/
+    ├── conftest.py
+    └── unit/
 ```
 
 The structure will evolve as new components are implemented.
@@ -118,9 +120,25 @@ The structure will evolve as new components are implemented.
 ### Automated Tests
 
 - Unit tests with Pytest.
-- Validation of shipment business rules.
-- Reconciliation scenario tests.
-- Data quality validation tests.
+- Shipment model validation.
+- Business rule validation.
+- Pandas reconciliation tests.
+- Data quality validation.
+- SQLAlchemy repository tests.
+- SQLite persistence tests.
+- Idempotency validation.
+
+### Database Persistence
+
+- SQLite database integration.
+- SQLAlchemy 2.0 typed ORM models.
+- Operation unit persistence.
+- Shipment persistence.
+- Report import history.
+- SHA-256 file fingerprinting.
+- Idempotent report import registration.
+- Shipment upsert operations.
+- UTC-aware datetime persistence.
 
 ## 🚀 Getting Started
 
@@ -154,7 +172,19 @@ uv run python -m backend.scripts.generate_demo_data
 ```bash
 uv run python -m backend.scripts.run_reconciliation
 ```
+### Run the reconciliation pipeline
 
+On Windows PowerShell:
+
+```bash
+$env:PYTHONPATH="backend"
+
+uv run python -m backend.scripts.generate_demo_data
+
+uv run python -m backend.scripts.run_reconciliation
+
+uv run python -m backend.scripts.inspect_database
+```
 ### Run automated tests
 
 ```bash
@@ -179,8 +209,11 @@ All generated information is synthetic and intended for demonstration and testin
 - [x] Implement Pandas report reconciliation
 - [x] Identify duplicate and invalid records
 - [x] Implement initial automated tests
+- [x] Integrate SQLite and SQLAlchemy
+- [x] Persist operation units and shipments
+- [x] Register imported reports
+- [x] Implement initial idempotency controls
 - [ ] Implement complete Excel and CSV ingestion
-- [ ] Integrate SQLite and SQLAlchemy
 - [ ] Develop REST API with FastAPI
 - [ ] Build React dashboard
 - [ ] Create simulated logistics portal

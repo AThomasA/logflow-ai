@@ -23,7 +23,7 @@ dev = [
 
 [tool.pytest.ini_options]
 pythonpath = ["backend"]
-testpaths = ["backend\tests"]
+testpaths = ["backend/tests"]
 
 [tool.ruff]
 line-length = 88
