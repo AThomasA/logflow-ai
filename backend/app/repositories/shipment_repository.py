@@ -4,7 +4,7 @@ from pathlib import Path
 from app.db.models.operation_unit import OperationUnit
 from app.db.models.report_import import ReportImport
 from app.db.models.shipment import Shipment
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 
@@ -97,3 +97,20 @@ def upsert_shipments(
     session.flush()
 
     return len(records)
+
+def list_shipments(session: Session) -> list[Shipment]:
+
+    return list(session.scalars(select(Shipment).order_by(Shipment.id)).all())
+
+def list_shipments_by_status(
+    session: Session, 
+    status: str,
+    ) -> list[Shipment]:
+    
+    statement = (
+        select(Shipment)
+        .where(func.lower(Shipment.status) == status.lower())
+        .order_by(Shipment.id))
+
+    return list(session.scalars(statement).all())
+

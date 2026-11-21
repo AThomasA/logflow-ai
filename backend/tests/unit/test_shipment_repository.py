@@ -4,6 +4,8 @@ from app.db.models.operation_unit import OperationUnit
 from app.db.models.report_import import ReportImport
 from app.db.models.shipment import Shipment
 from app.repositories.shipment_repository import (
+    list_shipments,
+    list_shipments_by_status,
     register_report_import,
     upsert_shipments,
 )
@@ -38,6 +40,36 @@ def test_save_shipment(db_session):
     assert shipment is not None
     assert shipment.status == "pending"
     assert shipment.operation_unit.name == "João Pessoa"
+
+
+def test_list_shipments_in_id_order(db_session):
+    upsert_shipments(
+        db_session,
+        [
+            make_shipment("BR1002"),
+            make_shipment("BR1001"),
+        ],
+    )
+
+    shipments = list_shipments(db_session)
+
+    assert [shipment.tracking_code for shipment in shipments] == ["BR1002", "BR1001"]
+
+
+def test_list_shipments_by_status(db_session):
+    upsert_shipments(
+        db_session,
+        [
+            make_shipment("BR1001", status="pending"),
+            make_shipment("BR1002", status="delayed"),
+        ],
+    )
+
+    pending = list_shipments_by_status(db_session, "pending")
+    delayed = list_shipments_by_status(db_session, "delayed")
+
+    assert [shipment.tracking_code for shipment in pending] == ["BR1001"]
+    assert [shipment.tracking_code for shipment in delayed] == ["BR1002"]
 
 
 def test_create_operation_unit_only_once(db_session):

@@ -1,6 +1,11 @@
 from datetime import datetime, timedelta
 
 from app.domain.shipment import Shipment
+from app.repositories.shipment_repository import (
+    list_shipments,
+    list_shipments_by_status,
+)
+from sqlalchemy.orm import Session
 
 
 def find_pending_shipments(
@@ -45,3 +50,10 @@ def find_delayed_shipments(
         for shipment in shipments
         if (shipment.is_pending and reference_time - shipment.received_at > threshold)
     ]
+    
+def get_all_shipments(session: Session) -> list[Shipment]:
+    return list_shipments(session)
+
+def get_shipments_by_status(session: Session, status: str) -> list[Shipment]:
+    return list_shipments_by_status(session, status)
+
