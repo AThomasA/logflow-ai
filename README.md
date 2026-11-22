@@ -1,13 +1,13 @@
 
 # LogFlow AI
 
-**An open-source logistics automation platform built with Python, FastAPI, React and OpenClaw.**
+**An open-source logistics automation portfolio project built with Python, FastAPI and React, with OpenClaw integration planned.**
 
 LogFlow AI is an independent software engineering portfolio project focused on automating logistics data processing, identifying operational inconsistencies and providing useful insights through a web dashboard.
 
 The project simulates a logistics operation involving multiple units, shipment reports, pending deliveries and operational discrepancies.
 
-> **Project status:** Active development — shipment modeling, business rules, synthetic data generation and Pandas reconciliation implemented.
+> **Project status:** Active development — synthetic data generation, Pandas reconciliation, SQLite persistence, shipment REST endpoints, and an initial React dashboard are implemented. Frontend/API integration still has known follow-up issues; see [Known Limitations](#known-limitations).
 
 ## 🎯 Project Goals
 
@@ -31,58 +31,62 @@ The project simulates a logistics operation involving multiple units, shipment r
 | SQLAlchemy | Database access and ORM |
 | SQLite | Initial database |
 | React | Frontend |
-| TypeScript | Frontend development |
+| JavaScript (JSX) | Frontend development |
+| Vite | Frontend development server and build |
+| Oxlint | Frontend linting |
 | Playwright | Browser automation in a simulated environment |
 | OpenClaw | Automation orchestration |
 | Pytest | Automated testing |
 
-## 🏗️ Planned Architecture
+## 🏗️ Architecture
 
-The application is planned around the following components:
+The application is built around the following components:
 
-1. Data ingestion: importing Excel and CSV reports.
+1. Data generation and ingestion: synthetic CSV and Excel reports; user-provided file uploads remain planned.
 2. Data normalization: standardizing columns, dates and statuses.
 3. Reconciliation: comparing reports and identifying inconsistencies.
-4. Persistence: storing shipments, events and execution history.
-5. API: exposing operational data through FastAPI.
-6. Dashboard: presenting indicators and discrepancies.
-7. Automation: coordinating scheduled processes.
-8. AI assistance: generating explanatory summaries without replacing deterministic business rules.
+4. Persistence: storing shipments, operation units and report import history in SQLite.
+5. API: exposing health and shipment queries through FastAPI.
+6. Dashboard: a React prototype that reads shipment data from the API.
+7. Automation: scheduled processing with OpenClaw remains planned.
+8. AI assistance: explanatory summaries remain planned and must not replace deterministic business rules.
 
 ## 📂 Project Structure
 
 ```text
-backend/
-├── app/
-│   ├── domain/
-│   │   └── shipment.py
-│   ├── db/
-│   │   ├── base.py
-│   │   ├── session.py
-│   │   ├── types.py
-│   │   └── models/
-│   │       ├── operation_unit.py
-│   │       ├── shipment.py
-│   │       └── report_import.py
-│   ├── repositories/
-│   │   └── shipment_repository.py
-│   └── services/
-│       ├── shipment_service.py
-│       ├── reconciliation_service.py
-│       └── persistence_service.py
-├── scripts/
-│   ├── generate_demo_data.py
-│   ├── run_reconciliation.py
-│   └── inspect_database.py
-└── tests/
-    ├── conftest.py
-    └── unit/
+logflow-ai/
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── domain/shipment.py
+│   │   ├── db/
+│   │   │   ├── base.py
+│   │   │   ├── session.py
+│   │   │   ├── types.py
+│   │   │   └── models/
+│   │   ├── repositories/shipment_repository.py
+│   │   ├── schemas/shipment.py
+│   │   └── services/
+│   │       ├── shipment_service.py
+│   │       ├── reconciliation_service.py
+│   │       └── persistence_service.py
+│   ├── scripts/
+│   │   ├── generate_demo_data.py
+│   │   ├── run_reconciliation.py
+│   │   └── inspect_database.py
+│   └── tests/
+│       ├── conftest.py
+│       └── unit/
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── services/api.js
+│   │   └── components/
+│   └── package.json
+└── data/
+    └── samples/
 ```
 
-The structure will evolve as new components are implemented.
-
-
-```markdown
 ## ✅ Implemented Features
 
 ### Shipment Domain
@@ -140,6 +144,21 @@ The structure will evolve as new components are implemented.
 - Shipment upsert operations.
 - UTC-aware datetime persistence.
 
+### REST API
+
+- FastAPI application with a health check endpoint.
+- List all shipments.
+- Filter persisted shipments by `pending` and `delayed` status.
+- Pydantic response schema for shipment records.
+- Development CORS configuration for the local Vite frontend.
+
+### React Dashboard Prototype
+
+- Dashboard cards for total, dispatched, pending and delayed shipments.
+- Shipment table and all/pending/delayed filters.
+- Loading, error, empty and retry UI states.
+- API client for the three shipment list endpoints.
+
 ## 🚀 Getting Started
 
 ### Requirements
@@ -161,39 +180,71 @@ cd logflow-ai
 uv sync
 ```
 
-### Generate synthetic logistics reports
+### Generate data and run reconciliation
 
-```bash
-uv run python -m backend.scripts.generate_demo_data
-```
+On Windows PowerShell, from the repository root:
 
-### Run the reconciliation process
-
-```bash
-uv run python -m backend.scripts.run_reconciliation
-```
-### Run the reconciliation pipeline
-
-On Windows PowerShell:
-
-```bash
+```powershell
 $env:PYTHONPATH="backend"
-
 uv run python -m backend.scripts.generate_demo_data
-
 uv run python -m backend.scripts.run_reconciliation
-
 uv run python -m backend.scripts.inspect_database
 ```
+
+The generator writes synthetic CSV and Excel reports to `data/samples/`. Reconciliation reads the CSV reports and persists results in `data/logflow.db`.
+
+### Run the API
+
+The current frontend API client uses port `8001`. From the repository root, start the API on that port:
+
+```powershell
+uv run uvicorn app.main:app --app-dir backend --reload --host 127.0.0.1 --port 8001
+```
+
+Available routes:
+
+```text
+GET http://127.0.0.1:8001/api/health
+GET http://127.0.0.1:8001/api/shipments
+GET http://127.0.0.1:8001/api/shipments/pending
+GET http://127.0.0.1:8001/api/shipments/delayed
+```
+
+Interactive API documentation is available at `http://127.0.0.1:8001/docs`.
+
+### Run the frontend
+
+In a second terminal:
+
+```powershell
+Set-Location frontend
+npm ci
+npm run dev -- --host 127.0.0.1
+```
+
+Open the Vite URL shown in the terminal (normally `http://127.0.0.1:5173`). The backend must be running and populated with data.
+
+To validate the frontend:
+
+```powershell
+npm run build
+npm run lint
+```
+
 ### Run automated tests
 
-```bash
+```powershell
 uv run pytest -v
 ```
 
-The application is still under development. Instructions for running the complete system will be added as the components become available.
+### Known Limitations
 
-The generated reports are stored in data/samples/.
+- `frontend/src/services/api.js` currently hard-codes `http://127.0.0.1:8001/api`; the API base URL should later be moved to frontend environment configuration.
+- The API returns `received_at`, but the dashboard currently reads the misspelled `recived_at` property, so the receipt timestamp may display as `-`.
+- The frontend build succeeds, but `npm run lint` currently reports unused asset imports in `frontend/src/App.jsx`.
+- File upload, public deployment, authentication, scheduled processing, Playwright automation and AI summaries are not implemented yet.
+
+Generated reports are stored in `data/samples/`.
 
 All generated information is synthetic and intended for demonstration and testing purposes.
 
@@ -213,9 +264,10 @@ All generated information is synthetic and intended for demonstration and testin
 - [x] Persist operation units and shipments
 - [x] Register imported reports
 - [x] Implement initial idempotency controls
+- [x] Build React dashboard
+- [x] Develop REST API with FastAPI (health, all shipments, pending and delayed endpoints)
 - [ ] Implement complete Excel and CSV ingestion
-- [ ] Develop REST API with FastAPI
-- [ ] Build React dashboard
+- [ ] Complete frontend/API integration and resolve current date-field and configuration issues
 - [ ] Create simulated logistics portal
 - [ ] Implement browser automation with Playwright
 - [ ] Integrate OpenClaw orchestration
@@ -229,7 +281,7 @@ The project uses synthetic logistics data and a simulated environment.
 
 It is not connected to real carriers, private logistics systems or production customer databases.
 
-A demonstration mode for sample data and user-provided spreadsheets is planned.
+A demonstration mode with synthetic sample data is available. Uploading user-provided spreadsheets is planned.
 
 ## 👨‍💻 Development
 
